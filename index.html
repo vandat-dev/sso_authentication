@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSO Authentication với Google</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .auth-section {
+            margin-bottom: 30px;
+        }
+
+        .user-info {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 4px solid #667eea;
+        }
+
+        .user-details {
+            text-align: left;
+        }
+
+        .user-field {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field-value {
+            color: #666;
+            word-break: break-all;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            color: #667eea;
+            margin-top: 20px;
+        }
+
+        /* Custom Google Sign-In button style */
+        .google-signin-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: white;
+            border: 2px solid #dadce0;
+            border-radius: 8px;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            max-width: 280px;
+        }
+
+        .google-signin-btn:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-color: #4285f4;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">🔐</div>
+
+    <h1>SSO Authentication</h1>
+    <p class="subtitle">Đăng nhập bằng tài khoản Google để truy cập hệ thống</p>
+
+    <!-- Login Section -->
+    <div class="auth-section" id="loginSection">
+        <div id="g_id_onload"
+                 data-client_id="47548921131-cnrkp8qv1t09ncn2f27l4584pv4lu7du.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="popup"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+
+        <div class="g_id_signin"
+             data-type="standard"
+             data-shape="rectangular"
+             data-theme="outline"
+             data-text="signin_with"
+             data-size="large"
+             data-logo_alignment="left">
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading" id="loading">
+        <p>🔄 Đang xác thực...</p>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-message" id="errorMessage"></div>
+
+    <!-- User Info Section -->
+    <div class="user-info" id="userInfo">
+        <img class="user-avatar" id="userAvatar" src="" alt="Avatar">
+
+        <div class="user-details">
+            <div class="user-field">
+                <span class="field-label">👤 Tên:</span>
+                <span class="field-value" id="userName"></span>
+            </div>
+
+            <div class="user-field">
+                <span class="field-label">📧 Email:</span>
+                <span class="field-value" id="userEmail"></span>
+            </div>
+
+            <div class="user-field">
+                <span class="field-label">🆔 ID:</span>
+                <span class="field-value" id="userId"></span>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:8000';
+
+    // Handle Google Sign-In response
+    function handleCredentialResponse(response) {
+        console.log("Google credential response:", response);
+        verifyTokenWithBackend(response.credential)
+        // Decode JWT token để lấy access token
+        // Trong thực tế, bạn cần sử dụng Google OAuth flow để lấy access token
+        // Đây là demo đơn giản, trong production cần implement OAuth flow đầy đủ
+
+
+    }
+
+    // Gửi access token tới backend để verify
+    async function verifyTokenWithBackend(accessToken) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_token: accessToken
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Verification failed');
+            }
+
+        } catch (error) {
+            console.error('Token verification error:', error);
+            showError(`Lỗi xác thực: ${error.message}`);
+            showLoading(false);
+        }
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+
+</script>
+</body>
+</html> 
